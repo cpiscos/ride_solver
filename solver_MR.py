@@ -52,16 +52,13 @@ def objective(x, time):
     return -distance
 
 
-print_vars_for_excel = True
+
 t = np.arange(0,50)
 start_time = time()
-# df = pd.read_excel("optimize 60.xlsx", header=2)
-# test_vars = df["rider input accel"].values
-angle = np.sin(t)*0
+angle = np.sin(t)*0.1 
 max_acc = 0.1*np.sin(t)+2
 radius = (np.sin(t*0.1)**2)*100+3
 min_acc = -max_acc
-# constant = df.loc[:, ["time", "angle", "safe max accel", "radius", "safe min accel"]]
 guess = [0]*len(t)
 
 get_simulated_accel_and_velocity = partial(get_simulated_accel_and_velocity,
@@ -91,31 +88,30 @@ cen_acc = get_centripetal_accel(x=inputs,radii=radius)
 mag_acc = get_mags(inputs)
 power = get_power(inputs)
 
-fig,[ax,ax2] = plt.subplots(1,2,figsize=(20,10))
-ax.plot(t,max_acc,lw=5,c='g',label='max_acc')
-ax.plot(t,min_acc,lw=5,c='r',label='min_acc')
-ax.plot(t,inputs,'red',label='rider optimum')
-ax.fill_between(t,0,inputs,where=inputs <0,facecolor='red',alpha=0.2,interpolate=True)
-ax.fill_between(t,0,inputs,where=inputs >= 0,facecolor='green',alpha=0.2,interpolate=True)
-ax.plot(t,cen_acc,'gold',label='centripital')
-ax.plot(t,mag_acc,'b--',lw=5,label='magnitude')
-
+fig,[ax1,ax2] = plt.subplots(1,2,figsize=(20,10))
+ax1.plot(t,max_acc,lw=5,c='g',label='max_acc')
+ax1.plot(t,min_acc,lw=5,c='r',label='min_acc')
+ax1.plot(t,inputs,'red',label='rider optimum')
+ax1.fill_between(t,0,inputs,where=inputs <0,facecolor='red',alpha=0.2,interpolate=True)
+ax1.fill_between(t,0,inputs,where=inputs >= 0,facecolor='green',alpha=0.2,interpolate=True)
+ax1.plot(t,cen_acc,'gold',label='centripital')
+ax1.plot(t,mag_acc,'b--',lw=5,label='magnitude')
+ax1.set_ylabel('acceleration')
 
 ax2.plot(t,vel,'r',label = 'velocity')
+
 ax3 = ax2.twinx()
 ax3.plot(t,power,'g--',lw=5,label = 'power')
 
-ax.legend(fontsize='x-large')
-ax2.legend(fontsize='x-large')
-ax3.legend(fontsize='x-large')
+ax2.set_ylabel('speed')
+ax3.set_ylabel('power')
+ax2.legend(fontsize='x-large',loc='lower right')
+ax2.legend(fontsize='x-large',loc='lower right')
+ax3.legend(fontsize='x-large',loc='lower left')
 plt.show()
  
 
-
-
 print("Total time taken: {:.4}s".format(time()-start_time))
 print("Optimization time taken: {:.4}s".format(time()-opt_start_time))
-# print("Distance using excel inputs: {}".format(-objective(test_vars)))
 print("Distance using scipy inputs: {}".format(-objective(result.x)))
-# if print_vars_for_excel:
-    # print(("Vars:\n" + "{:.10f}\n"*variables).format(*result.x.tolist()))
+
