@@ -3,6 +3,7 @@ from functools import partial
 import numpy as np
 import pandas as pd
 from scipy.optimize import NonlinearConstraint, Bounds, minimize
+from time import time
 
 
 def get_simulated_accel_and_velocity(x, slope, time, g=9.81):
@@ -46,6 +47,9 @@ def objective(x, time):
 
 
 if __name__ == '__main__':
+    print_vars_for_excel = False
+
+    start_time = time()
     df = pd.read_excel("optimize 1.xlsx", header=2)
     test_vars = df["rider input accel"].values
     constant = df.loc[:, ["time", "slope", "safe max accel", "radius", "safe min accel"]]
@@ -59,9 +63,13 @@ if __name__ == '__main__':
     safe_min_accel_constraint = Bounds(constant["safe min accel"], np.inf)
     power_constraint = NonlinearConstraint(get_power, -np.inf, 500)
     mags_constraint = NonlinearConstraint(get_mags, -np.inf, constant["safe max accel"])
+    opt_start_time = time()
     result = minimize(objective, np.random.randn(variables), bounds=safe_min_accel_constraint,
                       constraints=[power_constraint, mags_constraint],
                       method='trust-constr')
+    print("Total time taken: {:.4}s".format(time()-start_time))
+    print("Optimization time taken: {:.4}s".format(time()-opt_start_time))
     print("Distance using excel inputs: {}".format(-objective(test_vars)))
     print("Distance using scipy inputs: {}".format(-objective(result.x)))
-    print(("Vars:\n" + "{:.10f}\n"*variables).format(*result.x.tolist()))
+    if print_vars_for_excel:
+        print(("Vars:\n" + "{:.10f}\n"*variables).format(*result.x.tolist()))
