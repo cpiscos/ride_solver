@@ -60,9 +60,9 @@ if __name__ == '__main__':
     get_centripetal_accel = partial(get_centripetal_accel, radii=constant["radius"].values)
     objective = partial(objective, time=constant["time"].values)
 
-    safe_min_accel_constraint = Bounds(constant["safe min accel"], np.inf)
+    safe_min_accel_constraint = Bounds(constant["safe min accel"].values, np.inf)
     power_constraint = NonlinearConstraint(get_power, -np.inf, 500)
-    mags_constraint = NonlinearConstraint(get_mags, -np.inf, constant["safe max accel"])
+    mags_constraint = NonlinearConstraint(get_mags, -np.inf, constant["safe max accel"].values)
     opt_start_time = time()
     result = minimize(objective, np.random.randn(variables), bounds=safe_min_accel_constraint,
                       constraints=[power_constraint, mags_constraint],
